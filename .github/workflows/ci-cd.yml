@@ -101,7 +101,7 @@ jobs:
             fi
 
             echo "Cloning the repository..."
-            git clone https://github.com/palemanudeep/Deploy-Medusa-on-AWS-EC2.git ./my-app-store
+            git clone https://github.com/palemanudeep/TASK-1.git ./my-app-store
 
             cd ./my-app-store
 
