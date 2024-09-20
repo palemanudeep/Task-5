@@ -128,7 +128,7 @@ jobs:
             fi
 
             # Start the Medusa application in the background with a timeout of 2 minutes
-            nohup timeout 120 sudo npm run start &
+            nohup sudo medusa start &> medusa.log &
 
             echo "Medusa deployment initiated."
       
