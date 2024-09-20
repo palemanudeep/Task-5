@@ -101,7 +101,7 @@ jobs:
             fi
 
             echo "Cloning the repository..."
-            git clone https://github.com/palemanudeep/TASK-1.git ./my-app-store
+            git clone https://github.com/palemanudeep/TASK-3.git ./my-app-store
 
             cd ./my-app-store
 
