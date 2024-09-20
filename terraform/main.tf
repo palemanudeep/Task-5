@@ -45,7 +45,7 @@ resource "aws_security_group" "ec2_sg" {
 # EC2 Instance
 resource "aws_instance" "medusa_instance" {
   ami           = "ami-0522ab6e1ddcc7055"
-  instance_type = "t2.medium"
+  instance_type = "t2.large"
   key_name      = var.ec2_key_pair  # The key pair for SSH access
   security_groups = [
     aws_security_group.ec2_sg.name
