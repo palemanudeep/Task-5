@@ -97,7 +97,7 @@ jobs:
             # Check if the directory exists, delete it if true, and then clone the repository
             if [ -d "./my-app-store" ]; then
               echo "Directory ./my-app-store exists. Deleting it..."
-              rm -rf ./my-app-store
+              sudo rm -rf ./my-app-store
             fi
 
             echo "Cloning the repository..."
