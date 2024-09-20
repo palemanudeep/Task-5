@@ -49,7 +49,7 @@ jobs:
         if: github.event.inputs.action == 'apply'
         run: | 
           terraform apply -auto-approve tfplan
-          echo "EC2_HOST=$(terraform output ec2_public_ip)" >> $GITHUB_ENV
+          echo "EC2_HOST=$(terraform output -raw ec2_public_ip)" >> $GITHUB_ENV
           echo ${{ env.EC2_HOST }}
         working-directory: ./terraform
 
@@ -64,79 +64,67 @@ jobs:
       - name: Set up SSH
         uses: webfactory/ssh-agent@v0.5.3
         with:
-          ssh-private-key: ${{ secrets.EC2_KEY }}
+          ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
 
       - name: Update and Install Dependencies
-      run: |
-        ssh -o StrictHostKeyChecking=no -o ConnectTimeout=60 ubuntu@${{ secrets.EC2_HOST }} << 'EOF'
-          # Update and install necessary packages
-          sudo apt-get update -y
-          sudo apt-get upgrade -y
-          
-          # Install Node.js 18.x
-          curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
-          sudo apt install -y nodejs
-          
-          # Install PostgreSQL
-          sudo apt install -y postgresql postgresql-contrib
-          sudo systemctl start postgresql
-          sudo systemctl enable postgresql
+        run: |
+          ssh -o StrictHostKeyChecking=no -o ConnectTimeout=60 ubuntu@${{ env.EC2_HOST }} << 'EOF'
+            # Update and install necessary packages
+            sudo apt-get update -y
+            sudo apt-get upgrade -y
+            
+            # Install Node.js 18.x
+            curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+            sudo apt install -y nodejs
+            
+            # Install PostgreSQL
+            sudo apt install -y postgresql postgresql-contrib
+            sudo systemctl start postgresql
+            sudo systemctl enable postgresql
 
-          # Create PostgreSQL database and user
-          sudo -u postgres psql -c "CREATE USER medusabackend WITH PASSWORD 'medusa123' CREATEDB;"
-          sudo -u postgres psql -c "CREATE DATABASE medusabackend OWNER medusabackend;"
-          sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE medusabackend TO medusabackend;"
+            # Create PostgreSQL database and user
+            sudo -u postgres psql -c "CREATE USER medusabackend WITH PASSWORD 'medusa123' CREATEDB;"
+            sudo -u postgres psql -c "CREATE DATABASE medusabackend OWNER medusabackend;"
+            sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE medusabackend TO medusabackend;"
 
-          # Install Redis
-          sudo apt install -y redis-server
-          sudo systemctl enable redis-server
-          sudo systemctl start redis-server
+            # Install Redis
+            sudo apt install -y redis-server
+            sudo systemctl enable redis-server
+            sudo systemctl start redis-server
 
-          # Clone the Medusa app repository
-          if [ ! -d "./my-app-store" ]; then
-            git clone https://github.com/palemanudeep/Deploy-Medusa-on-AWS-EC2.git ./my-app-store
-          else
-            echo "Directory ./my-app-store already exists. Skipping clone."
-          fi
-          cd ./my-app-store
+            # Clone the Medusa app repository
+            if [ ! -d "./my-app-store" ]; then
+              git clone https://github.com/palemanudeep/Deploy-Medusa-on-AWS-EC2.git ./my-app-store
+            else
+              echo "Directory ./my-app-store already exists. Skipping clone."
+            fi
+            cd ./my-app-store
 
-          # Set up .env file
-          touch .env
-          echo "DATABASE_URL=postgres://medusabackend:medusa123@localhost:5432/medusabackend" > .env
-          echo "REDIS_URL=redis://localhost:6379" >> .env
+            # Set up .env file
+            touch .env
+            echo "DATABASE_URL=postgres://medusabackend:medusa123@localhost:5432/medusabackend" > .env
+            echo "REDIS_URL=redis://localhost:6379" >> .env
 
-          # Install Medusa dependencies
-          sudo npm install -g @medusajs/medusa-cli
-          npm install
-          npm install cross-env --save-dev
+            # Install Medusa dependencies
+            sudo npm install -g @medusajs/medusa-cli
+            npm install
+            npm install cross-env --save-dev
 
-          # Run database migrations
-          npx medusa migrations run
+            # Run database migrations
+            npx medusa migrations run
 
-          # Create Medusa admin user
-          npx medusa user -e anudeep@gmail.com -p anudeep123
+            # Create Medusa admin user
+            npx medusa user -e anudeep@gmail.com -p anudeep123
 
-          # Check for process using port 9000 and kill it if necessary
-          if lsof -i :9000; then
-            echo "Killing process running on port 9000..."
-            lsof -ti:9000 | xargs kill -9
-          fi
+            # Check for process using port 9000 and kill it if necessary
+            if lsof -i :9000; then
+              echo "Killing process running on port 9000..."
+              lsof -ti:9000 | xargs kill -9
+            fi
 
-          # Start the Medusa application in the background
-          if lsof -i :9000; then
-            echo "Killing process running on port 9000..."
-            lsof -ti:9000 | xargs kill -9
-          fi
+            # Start the Medusa application in the background with a timeout of 2 minutes
+            nohup timeout 120 sudo npm run start &
 
-          # Start the Medusa application in the background with a timeout of 2 minutes
-          nohup timeout 120 sudo npm run start &
-
-          # Check the condition and exit if true
-          if [ 1 -eq 1 ]; then
-            echo "Condition met: exiting process."
-            exit 0
-          fi
-
-          echo "Medusa deployment initiated."
-    
-        EOF
+            echo "Medusa deployment initiated."
+      
+          EOF
