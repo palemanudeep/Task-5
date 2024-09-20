@@ -94,11 +94,15 @@ jobs:
             sudo systemctl start redis-server
 
             # Clone the Medusa app repository
-            if [ ! -d "./my-app-store" ]; then
-              git clone https://github.com/palemanudeep/Deploy-Medusa-on-AWS-EC2.git ./my-app-store
-            else
-              echo "Directory ./my-app-store already exists. Skipping clone."
+            # Check if the directory exists, delete it if true, and then clone the repository
+            if [ -d "./my-app-store" ]; then
+              echo "Directory ./my-app-store exists. Deleting it..."
+              rm -rf ./my-app-store
             fi
+
+            echo "Cloning the repository..."
+            git clone https://github.com/palemanudeep/Deploy-Medusa-on-AWS-EC2.git ./my-app-store
+
             cd ./my-app-store
 
             # Set up .env file
