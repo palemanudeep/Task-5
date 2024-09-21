@@ -36,8 +36,6 @@ jobs:
       - name: Terraform Init
         run: terraform init
         working-directory: ./terraform
-      - name: Force Unlock Terraform State (if locked)
-        run: terraform force-unlock be93d2e5-af09-0975-2671-afe6bba42adc || echo "No active lock found"
 
       - name: Terraform Plan
         id: terraform-plan
@@ -103,7 +101,7 @@ jobs:
             fi
 
             echo "Cloning the repository..."
-            git clone https://github.com/palemanudeep/TASK-3.git ./my-app-store
+            git clone https://github.com/palemanudeep/TASK-1.git ./my-app-store
 
             cd ./my-app-store
 
