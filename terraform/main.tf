@@ -1,6 +1,6 @@
 # Security Group for EC2
 resource "aws_security_group" "ec2_sg" {
-  name        = "new-ec2-security-group"
+  name        = "ec2-security-group"
   description = "Allow SSH and HTTP"
   vpc_id      = "vpc-0e77cbe60dfd345dd"
 
