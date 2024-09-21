@@ -1,6 +1,6 @@
 # Security Group for EC2
 resource "aws_security_group" "ec2_sg" {
-  name        = "ec2-security-group"
+  name        = "new-ec2-security-group"
   description = "Allow SSH and HTTP"
   vpc_id      = "vpc-0e77cbe60dfd345dd"
 
@@ -45,7 +45,7 @@ resource "aws_security_group" "ec2_sg" {
 # EC2 Instance
 resource "aws_instance" "medusa_instance" {
   ami           = "ami-0522ab6e1ddcc7055"
-  instance_type = "t2.large"
+  instance_type = "t2.xlarge"
   key_name      = var.ec2_key_pair  # The key pair for SSH access
   security_groups = [
     aws_security_group.ec2_sg.name
