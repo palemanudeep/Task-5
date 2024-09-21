@@ -13,10 +13,10 @@ terraform {
 
 terraform {
   backend "s3" {
-    bucket         = "new-medusa-task5-terraform-state-bucket"
-    key            = "new-medusa-terraform-automation.tfstate"
+    bucket         = "medusa-task5-terraform-state-bucket"
+    key            = "medusa-terraform-automation.tfstate"
     region         = "ap-south-1"
-    dynamodb_table = "new-terraform-lock-table"
+    dynamodb_table = "terraform-lock-table"
     encrypt        = true
   }
 }
